@@ -127,6 +127,10 @@ if 'user_defined_facet_number' not in st.session_state:
 def increment_predefined_counter():
     st.session_state['number_slider_change'] += 1
     st.session_state['time_series'].append({'slider': datetime.datetime.now().timestamp()})
+    
+def increment_predefined_probability_counter():
+    st.session_state['number_slider_change'] += 1
+    st.session_state['time_series'].append({'probability_slider': datetime.datetime.now().timestamp()})
 
 def increment_similarity_counter():
     st.session_state['number_similiarity_slider_change'] += 1
@@ -135,6 +139,10 @@ def increment_similarity_counter():
 def increment_customized_counter():
     st.session_state['number_new_slider_change'] += 1
     st.session_state['time_series'].append({'customized_slider': datetime.datetime.now().timestamp()})
+    
+def increment_customized_probability_counter():
+    st.session_state['number_new_slider_change'] += 1
+    st.session_state['time_series'].append({'probability_customized_slider': datetime.datetime.now().timestamp()})
 
 def increment_search_counter():
     st.session_state['number_search'] += 1 
@@ -258,7 +266,7 @@ with st.sidebar:
 
     col1, col2 = st.columns([6, 1])
     with col1:
-        checkworthy = st.checkbox('Checkworthy', help='It is important to verify a factual claim by a professional fact-checker, which can cause harm to the society, specific person(s), company(s), product(s) or government entities. However, not all factual claims are important or worthwhile to be fact-checked by a professional fact-checker as it is a time-consuming procedure.', value=True, on_change=increment_predefined_counter)
+        checkworthy = st.checkbox('Checkworthy', help='It is important to verify a factual claim by a professional fact-checker, which can cause harm to the society, specific person(s), company(s), product(s) or government entities. However, not all factual claims are important or worthwhile to be fact-checked by a professional fact-checker as it is a time-consuming procedure.' , value=True)
     with col2:
         if checkworthy:
             checkworthy_select = st.toggle('', key='checkworthy_select', label_visibility='hidden')
@@ -270,7 +278,7 @@ with st.sidebar:
             if checkworthy_weight_slider == 0.00:
                 st.session_state.verifiable = True
             checkworthy_slider = st.slider('Select a range of values',0.00, 1.00, (0.00, 1.00), format="%f",
-                                        key='checkworthy_slider', disabled=st.session_state.checkworthy, label_visibility='collapsed', on_change=increment_predefined_counter)
+                                        key='checkworthy_slider', disabled=st.session_state.checkworthy, label_visibility='collapsed', on_change=increment_predefined_probability_counter)
     else:
         checkworthy_weight_slider = 0
         
@@ -290,7 +298,7 @@ with st.sidebar:
             new_facet_check = new_facet + '_check'
             col1, col2 = st.columns([6, 1])
             with col1:
-                new_facet_check = st.checkbox("""{new_facet}""".format(new_facet=item['facet_name'].capitalize()), key=new_facet + '_check', value=True, on_change=increment_customized_counter)
+                new_facet_check = st.checkbox("""{new_facet}""".format(new_facet=item['facet_name'].capitalize()), key=new_facet + '_check', value=True)
             with col2:
                 if new_facet_check:
                     new_facet_select = st.toggle('', key=new_facet + '_select', label_visibility='hidden')
@@ -306,7 +314,7 @@ with st.sidebar:
                         st.session_state[new_facet] = True
                     draw_graph(df_filter_data, new_facet, new_facet + "_prob")
                     new_facet_slider = st.slider('Select a range of values',0.0, 1.0, (0.0, 1.0), format="%f",
-                                            key=new_facet_slider, disabled=st.session_state[new_facet], label_visibility='collapsed', on_change=increment_customized_counter)
+                                            key=new_facet_slider, disabled=st.session_state[new_facet], label_visibility='collapsed', on_change=increment_customized_probability_counter)
             else:
                 # new_facet_weight_slider = new_facet + '_weight_slider'
                 st.session_state[new_facet + '_weight_slider'] = 0
