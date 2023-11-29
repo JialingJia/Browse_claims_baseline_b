@@ -124,30 +124,38 @@ if 'user_defined_facet_number' not in st.session_state:
     st.session_state.similarity_weight_boolean = True
 
 ## detect feature changes
-def increment_predefined_counter():
+def event_checkworthy_slider():
     st.session_state['number_slider_change'] += 1
-    st.session_state['time_series'].append({'slider': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'slider': datetime.datetime.now().timestamp(), 'score': st.session_state.checkworthy_weight})
     
-def increment_predefined_probability_counter():
+def event_checkworthy_probability_slider():
     st.session_state['number_slider_change'] += 1
-    st.session_state['time_series'].append({'probability_slider': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'probability_slider': datetime.datetime.now().timestamp(), 'max_score': st.session_state.checkworthy_slider[1], 'min_score': st.session_state.checkworthy_slider[0]})
 
-def increment_similarity_counter():
+def event_checkworthy_check():
+    st.session_state['number_slider_change'] += 1
+    st.session_state['time_series'].append({'slider': datetime.datetime.now().timestamp(), 'score': st.session_state.checkworthy_check})
+
+def event_similarity_slider():
     st.session_state['number_similiarity_slider_change'] += 1
-    st.session_state['time_series'].append({'similarity_slider': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'similarity_slider': datetime.datetime.now().timestamp(), 'score': st.session_state.query_similarity_weight})
 
-def increment_customized_counter():
+def event_customized_slider():
     st.session_state['number_new_slider_change'] += 1
-    st.session_state['time_series'].append({'customized_slider': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'customized_slider': datetime.datetime.now().timestamp(), 'score':st.session_state[new_facet + '_weight_slider']})
     
-def increment_customized_probability_counter():
+def event_customized_slider_check():
     st.session_state['number_new_slider_change'] += 1
-    st.session_state['time_series'].append({'probability_customized_slider': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'customized_slider': datetime.datetime.now().timestamp(), 'score':st.session_state[new_facet + '_check']})
+    
+def event_customized_probability_slider():
+    st.session_state['number_new_slider_change'] += 1
+    st.session_state['time_series'].append({'probability_customized_slider': datetime.datetime.now().timestamp(), "max_score":st.session_state[new_facet + '_slider'][1], "min_score":st.session_state[new_facet + '_slider'][0]})
 
-def increment_search_counter():
+def event_search():
     st.session_state['number_search'] += 1 
     # st.session_state['search_content'].append({'type': query_search ,'query': query})
-    st.session_state['time_series'].append({'search': datetime.datetime.now().timestamp()})
+    st.session_state['time_series'].append({'search': datetime.datetime.now().timestamp(), 'query': st.session_state.query})
 
 ## initiate feature state
 st.session_state.verifiable = True
@@ -241,12 +249,12 @@ df_filter_data['preview'] = 'tweet'
 
 ## search input
 query_search = 'similarity'
-# query_search = st.radio("xx", ('Similarity Search', 'Keyword Search'), horizontal=True, label_visibility='collapsed', on_change=increment_search_counter)
+# query_search = st.radio("xx", ('Similarity Search', 'Keyword Search'), horizontal=True, label_visibility='collapsed', on_change=event_search)
 # query = st_searchbox(
 #     search_wikipedia,
 #     key="wiki_searchbox"
 # )
-query = st.text_input("search:", label_visibility="collapsed", placeholder="Search claims", on_change=increment_search_counter)
+query = st.text_input("search:", label_visibility="collapsed", placeholder="Search claims", on_change=event_search)
 
 ## sidebar
 with st.sidebar:
@@ -255,7 +263,7 @@ with st.sidebar:
     if query:
         # st.markdown("""<hr style="margin:1em 0px" /> """, unsafe_allow_html=True)
         st.markdown('## Query similarity')
-        similarity_weight_slider = st.slider('Query similarity weight', key='query_similarity_weight', min_value=0.0, value=0.5, max_value=1.0, format="%f", label_visibility='hidden', on_change=increment_similarity_counter)
+        similarity_weight_slider = st.slider('Query similarity weight', key='query_similarity_weight', min_value=0.0, value=0.5, max_value=1.0, format="%f", label_visibility='hidden', on_change=event_similarity_slider)
         df_filter_data = similarity_search(query, df_filter_data)
         df_filter_data['search'] = query
         st.markdown("""<hr style="margin:1em 0px" /> """, unsafe_allow_html=True)
@@ -266,19 +274,19 @@ with st.sidebar:
 
     col1, col2 = st.columns([6, 1])
     with col1:
-        checkworthy = st.checkbox('Checkworthy', help='It is important to verify a factual claim by a professional fact-checker, which can cause harm to the society, specific person(s), company(s), product(s) or government entities. However, not all factual claims are important or worthwhile to be fact-checked by a professional fact-checker as it is a time-consuming procedure.' , value=True)
+        checkworthy = st.checkbox('Checkworthy', key="checkworthy_check", help='It is important to verify a factual claim by a professional fact-checker, which can cause harm to the society, specific person(s), company(s), product(s) or government entities. However, not all factual claims are important or worthwhile to be fact-checked by a professional fact-checker as it is a time-consuming procedure.' , value=True, on_change=event_checkworthy_check)
     with col2:
         if checkworthy:
             checkworthy_select = st.toggle('', key='checkworthy_select', label_visibility='hidden')
     if checkworthy:
-        checkworthy_weight_slider = st.slider('checkworthy', key='checkworthy_weight', min_value=0.0, value=0.1, max_value=1.0, format="%f", label_visibility='collapsed', on_change=increment_predefined_counter)
+        checkworthy_weight_slider = st.slider('checkworthy', key='checkworthy_weight', min_value=0.0, value=0.1, max_value=1.0, format="%f", label_visibility='collapsed', on_change=event_checkworthy_slider)
         if checkworthy_select:
             st.session_state.checkworthy = False
             draw_graph(df_filter_data, 'checkworthy', 'checkworthy_numeric')
             if checkworthy_weight_slider == 0.00:
                 st.session_state.verifiable = True
             checkworthy_slider = st.slider('Select a range of values',0.00, 1.00, (0.00, 1.00), format="%f",
-                                        key='checkworthy_slider', disabled=st.session_state.checkworthy, label_visibility='collapsed', on_change=increment_predefined_probability_counter)
+                                        key='checkworthy_slider', disabled=st.session_state.checkworthy, label_visibility='collapsed', on_change=event_checkworthy_probability_slider)
     else:
         checkworthy_weight_slider = 0
         
@@ -298,13 +306,13 @@ with st.sidebar:
             new_facet_check = new_facet + '_check'
             col1, col2 = st.columns([6, 1])
             with col1:
-                new_facet_check = st.checkbox("""{new_facet}""".format(new_facet=item['facet_name'].capitalize()), key=new_facet + '_check', value=True)
+                new_facet_check = st.checkbox("""{new_facet}""".format(new_facet=item['facet_name'].capitalize()), key=new_facet + '_check', value=True, on_change=event_customized_slider_check)
             with col2:
                 if new_facet_check:
                     new_facet_select = st.toggle('', key=new_facet + '_select', label_visibility='hidden')
             # st.write(st.session_state[new_facet + '_check'])
             if st.session_state[new_facet + '_check']:
-                new_facet_weight_slider = st.slider('xx', key=new_facet + '_weight_slider', min_value=0.0, value=0.1, max_value=1.0, format="%f", label_visibility='collapsed', on_change=increment_customized_counter)
+                new_facet_weight_slider = st.slider('xx', key=new_facet + '_weight_slider', min_value=0.0, value=0.1, max_value=1.0, format="%f", label_visibility='collapsed', on_change=event_customized_slider)
                 # st.write(new_facet_weight_slider)
                 weight_slider_list.append(st.session_state[new_facet + '_weight_slider'])
                 criteria_list.append(new_facet)
@@ -314,7 +322,7 @@ with st.sidebar:
                         st.session_state[new_facet] = True
                     draw_graph(df_filter_data, new_facet, new_facet + "_prob")
                     new_facet_slider = st.slider('Select a range of values',0.0, 1.0, (0.0, 1.0), format="%f",
-                                            key=new_facet_slider, disabled=st.session_state[new_facet], label_visibility='collapsed', on_change=increment_customized_probability_counter)
+                                            key=new_facet_slider, disabled=st.session_state[new_facet], label_visibility='collapsed', on_change=event_customized_probability_slider)
             else:
                 # new_facet_weight_slider = new_facet + '_weight_slider'
                 st.session_state[new_facet + '_weight_slider'] = 0
