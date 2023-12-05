@@ -254,7 +254,7 @@ query_search = 'similarity'
 #     search_wikipedia,
 #     key="wiki_searchbox"
 # )
-query = st.text_input("search:", label_visibility="collapsed", placeholder="Search claims", on_change=event_search)
+query = st.text_input("search:", key="query", label_visibility="collapsed", placeholder="Search claims", on_change=event_search)
 
 ## sidebar
 with st.sidebar:
